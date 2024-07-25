@@ -38,22 +38,8 @@ namespace ProcConfigBuilder.Services
             _logger = logger;
         }
 
-        public async Task<bool> CreateAndPublishProcConfigFile(JArray? events)
+        public async Task<bool> CreateAndPublishProcConfigFile(GridEvent<dynamic> gridEvent)
         {
-            var gridEvent = events?.First?.ToObject<GridEvent<dynamic>>();
-            if (gridEvent == null)
-            {
-                _logger.LogError("gridEvent is null.");
-                return false;
-            }
-            var type = gridEvent.EventType;
-            if (type != "UserRequestEvent")
-            {
-                string errMsg = $"Unexpected event type {type}";
-                _logger.LogError(errMsg);
-                throw new ArgumentException(errMsg);
-            }
-
             // Create the configuration file content; subsequent processing requires this to succeed
             var config = CreateProcConfig(gridEvent);
             if (config == null)

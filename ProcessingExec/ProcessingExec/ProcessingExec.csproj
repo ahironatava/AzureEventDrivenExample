@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\EventHubPublisherClient\EventHubPublisherClient\EventHubPublisherClient.csproj" />
     <ProjectReference Include="..\..\FakeDatabase\FakeDatabase\FakeDatabase.csproj" />
     <ProjectReference Include="..\..\RepositoryClient\RepositoryClient\RepositoryClient.csproj" />
+    <ProjectReference Include="..\..\WebHookAbstraction\WebHookAbstraction\WebHookAbstraction.csproj" />
   </ItemGroup>
 
 </Project>

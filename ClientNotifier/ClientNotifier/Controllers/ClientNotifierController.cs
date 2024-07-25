@@ -4,6 +4,8 @@ using WebHookAbstraction;
 
 namespace ClientNotifier.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class ClientNotifierController : WebHookController
     {
         private readonly IClientNotifierService _clientNotifierService;
@@ -32,7 +34,7 @@ namespace ClientNotifier.Controllers
                 return BadRequest(errMsg);
             }
             
-            var success = await _clientNotifierService.NotifyClient(validEvent);
+            bool success = await _clientNotifierService.NotifyClient(validEvent);
             if (success)
             {
                 _logger.LogInformation("NotifyClient successful");

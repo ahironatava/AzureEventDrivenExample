@@ -1,10 +1,8 @@
-﻿using Azure.Core;
-using CommonModels;
+﻿using CommonModels;
 using EventHubPublisherClient;
 using FakeDatabase;
 using ProcessingExec.Interfaces;
 using RepositoryClient;
-using System.ComponentModel;
 using System.Text.Json;
 
 namespace ProcessingExec.Services
@@ -41,7 +39,7 @@ namespace ProcessingExec.Services
             _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);
         }
 
-        public async Task<bool> ApplyConfiguredProcessing(GridEvent<dynamic>? gridEvent)
+        public async Task<bool> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
         {
             ProcConfig? procConfig = null;
             ProcessingResults procResults = new ProcessingResults();

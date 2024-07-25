@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventGridPublishClient", ".
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepositoryClient", "..\RepositoryClient\RepositoryClient\RepositoryClient.csproj", "{854F3697-7B56-47A8-8384-76A7AC34950E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHookAbstraction", "..\WebHookAbstraction\WebHookAbstraction\WebHookAbstraction.csproj", "{5FAD5B6A-1B8F-4C45-994B-1A03204C72A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{854F3697-7B56-47A8-8384-76A7AC34950E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{854F3697-7B56-47A8-8384-76A7AC34950E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{854F3697-7B56-47A8-8384-76A7AC34950E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FAD5B6A-1B8F-4C45-994B-1A03204C72A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FAD5B6A-1B8F-4C45-994B-1A03204C72A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FAD5B6A-1B8F-4C45-994B-1A03204C72A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FAD5B6A-1B8F-4C45-994B-1A03204C72A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

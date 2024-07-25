@@ -5,6 +5,6 @@ namespace ProcConfigBuilder.Interfaces
 {
     public interface IProcConfigBuilderService
     {
-        public Task<bool> CreateAndPublishProcConfigFile(JArray? events);
+        public Task<bool> CreateAndPublishProcConfigFile(GridEvent<dynamic> gridEvent);
     }
 }

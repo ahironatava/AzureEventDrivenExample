@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\CommonModels\CommonModels\CommonModels.csproj" />
     <ProjectReference Include="..\..\EventGridPublishClient\EventGridPublishClient\EventGridPublishClient.csproj" />
     <ProjectReference Include="..\..\RepositoryClient\RepositoryClient\RepositoryClient.csproj" />
+    <ProjectReference Include="..\..\WebHookAbstraction\WebHookAbstraction\WebHookAbstraction.csproj" />
   </ItemGroup>
 
 </Project>
