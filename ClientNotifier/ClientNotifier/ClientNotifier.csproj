@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\..\CommonModels\CommonModels\CommonModels.csproj" />
+    <ProjectReference Include="..\..\RelayPublishClient\RelayPublishClient\RelayPublishClient.csproj" />
+    <ProjectReference Include="..\..\WebHookAbstraction\WebHookAbstraction\WebHookAbstraction.csproj" />
   </ItemGroup>
 
 </Project>

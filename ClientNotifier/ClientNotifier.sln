@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientNotifier", "ClientNotifier\ClientNotifier.csproj", "{A7E975DE-605C-492C-9626-976A103FC51F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientNotifier", "ClientNotifier\ClientNotifier.csproj", "{A7E975DE-605C-492C-9626-976A103FC51F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHookAbstraction", "..\WebHookAbstraction\WebHookAbstraction\WebHookAbstraction.csproj", "{B0EDCDD6-978D-442B-A198-D3D873906509}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonModels", "..\CommonModels\CommonModels\CommonModels.csproj", "{27561F8B-62CA-4682-9792-134D84B474C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RelayPublishClient", "..\RelayPublishClient\RelayPublishClient\RelayPublishClient.csproj", "{0807322A-D9F1-43F9-8B75-86A0EED30891}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{A7E975DE-605C-492C-9626-976A103FC51F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7E975DE-605C-492C-9626-976A103FC51F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7E975DE-605C-492C-9626-976A103FC51F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0EDCDD6-978D-442B-A198-D3D873906509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0EDCDD6-978D-442B-A198-D3D873906509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0EDCDD6-978D-442B-A198-D3D873906509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0EDCDD6-978D-442B-A198-D3D873906509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27561F8B-62CA-4682-9792-134D84B474C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27561F8B-62CA-4682-9792-134D84B474C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27561F8B-62CA-4682-9792-134D84B474C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27561F8B-62CA-4682-9792-134D84B474C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0807322A-D9F1-43F9-8B75-86A0EED30891}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0807322A-D9F1-43F9-8B75-86A0EED30891}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0807322A-D9F1-43F9-8B75-86A0EED30891}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0807322A-D9F1-43F9-8B75-86A0EED30891}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
