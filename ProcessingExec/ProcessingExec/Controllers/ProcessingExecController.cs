@@ -34,8 +34,8 @@ namespace ProcessingExec.Controllers
                 return BadRequest(errMsg);
             }
 
-            var success = await _processingService.ApplyConfiguredProcessing(validEvent);
-            if (success)
+            int statusCode = await _processingService.ApplyConfiguredProcessing(validEvent);
+            if (statusCode == 200)
             {
                 _logger.LogInformation("ApplyConfiguredProcessing successful");
                 return Ok();
@@ -43,7 +43,7 @@ namespace ProcessingExec.Controllers
             else
             {
                 _logger.LogInformation("ApplyConfiguredProcessing system error");
-                return StatusCode(500);
+                return StatusCode(statusCode);
             }
         }
     }

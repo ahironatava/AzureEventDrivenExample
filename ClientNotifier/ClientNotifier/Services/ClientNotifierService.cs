@@ -8,8 +8,12 @@ namespace ClientNotifier.Services
     {
         private readonly RelaySender _relaySender;
 
-        public ClientNotifierService(IConfiguration configuration)
+        private readonly ILogger<ClientNotifierService> _logger;
+
+        public ClientNotifierService(IConfiguration configuration, ILogger<ClientNotifierService> logger)
         {
+            _logger = logger;
+
             RelayConfiguration relayConfiguration = new RelayConfiguration()
             {
                 RelayNamespace = configuration["relayNamespace"],
@@ -27,9 +31,16 @@ namespace ClientNotifier.Services
             List<string> stringList = new List<string>();
             stringList.Add(gridEvent.Data["RequestId"]);
             stringList.Add(gridEvent.Data["ProcessingSuccessful"]);
-            await _relaySender.Send(stringList);
-
-            return true;
+            (bool sent, string errMsg) = await _relaySender.Send(stringList);
+            if(! sent)
+            {
+                _logger.LogError(errMsg);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

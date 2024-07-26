@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CommonModels;
+using Microsoft.AspNetCore.Mvc;
 using ProcConfigBuilder.Interfaces;
 using WebHookAbstraction;
 
@@ -34,17 +35,46 @@ namespace ProcConfigBuilder.Controllers
                 return BadRequest(errMsg);
             }
 
-            bool success = await _procConfigBuilderService.CreateAndPublishProcConfigFile(validEvent);           
-            if(success)
+            if (!HasMandatoryContent(validEvent))
+            {
+                return BadRequest("Mandatory content is missing.");
+            }
+
+            int statusCode = await _procConfigBuilderService.CreateAndPublishProcConfigFile(validEvent);           
+            if(statusCode == 200)
             {
                 _logger.LogInformation("CreateAndPublishProcConfigFile succeeded.");
                 return Ok();
             }
             else 
             {
-                _logger.LogError("CreateAndPublishProcConfigFile system error.");
-                return StatusCode(500);
+                _logger.LogError($"CreateAndPublishProcConfigFile system error {statusCode}");
+                return StatusCode(statusCode);
             }   
+        }
+
+        private bool HasMandatoryContent(GridEvent<dynamic> gridEvent)
+        {
+            var userRequest = gridEvent.Data.UserRequest;
+            var requestId = userRequest?.RequestId;
+            var userName = userRequest?.UserName;
+            if(string.IsNullOrWhiteSpace(requestId) || string.IsNullOrWhiteSpace(userName))
+            {
+                _logger.LogError("RequestId or UserName is missing.");
+                return false;
+            }
+
+            var userTransaction = gridEvent.Data.UserRequest?.UserTransaction;
+            var transactionType = userTransaction?.TransactionType;
+            var stockName = userTransaction?.StockName;
+            var stockQuantity = userTransaction?.StockQuantity;
+            if(string.IsNullOrWhiteSpace(transactionType) || string.IsNullOrWhiteSpace(stockName) || stockQuantity < 1)
+            {
+                _logger.LogError("Transaction Type or StockName is missing, or StockQuantity is less than 1");
+                return false;
+            }
+
+            return true;
         }
     }
 }

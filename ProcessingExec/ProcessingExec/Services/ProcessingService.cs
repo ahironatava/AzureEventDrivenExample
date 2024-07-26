@@ -19,10 +19,11 @@ namespace ProcessingExec.Services
         private readonly ILogger<ProcessingService> _logger;
 
 
-        public ProcessingService(IConfiguration configuration, IFakeDatabase fakeDatabase)
+        public ProcessingService(IConfiguration configuration, IFakeDatabase fakeDatabase, ILogger<ProcessingService> logger)
         {
             _configuration = configuration;
             _fakeDatabase = fakeDatabase;
+            _logger = logger;
 
             // Initialise the Repository client interface
             string? repoUrl = _configuration["repo_url"];
@@ -39,7 +40,7 @@ namespace ProcessingExec.Services
             _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);
         }
 
-        public async Task<bool> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
+        public async Task<int> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
         {
             ProcConfig? procConfig = null;
             ProcessingResults procResults = new ProcessingResults();
@@ -54,16 +55,15 @@ namespace ProcessingExec.Services
             if (string.IsNullOrWhiteSpace(dynamicRequestId))
             {
                 _logger.LogError("Request Id is missing.");
-                return false;
+                return StatusCodes.Status400BadRequest;
             }
-            string requestId = gridEvent.Data.Id.ToString();
-            procResults.RequestId = requestId;
+            procResults.RequestId = gridEvent.Data.Id.ToString();
 
             // Get the ProcConfig file
-            (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(requestId);
+            (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(procResults.RequestId);
             if (procConfig == null)
             {
-                errMsg = $"ProcConfig file is missing for request {requestId}";
+                errMsg = $"ProcConfig file is missing for request {procResults.RequestId}";
                 _logger.LogError(errMsg);
                 procResults.StatusMessage = errMsg;
             }
@@ -72,22 +72,35 @@ namespace ProcessingExec.Services
                 procResults.UserName = procConfig.UserRequest.UserName;
                 procResults.StockName = procConfig.UserRequest.UserTransaction.StockName;
                 procResults.Quantity = procConfig.UserRequest.UserTransaction.Quantity;
-            }
 
-            // Orchestrate the required processing
-            if (procConfig != null)
-            {
+                // Orchestrate the required processing
                 var processingResults = OrchestrateProcessing(procConfig, procResults);
                 procResults.ProcessingSuccessful = (string.IsNullOrWhiteSpace(processingResults.StatusMessage)) ? false : true;
+            }
+
+            // Save the results to the repository
+            (bool saveSuccessful, string saveErrMsg) = await _repoClient.SaveProcResultAsync(procResults);
+            if(!saveSuccessful)
+            {
+                errMsg = $"Error saving processing results for request {procResults.RequestId}";
+                _logger.LogError(saveErrMsg);
+                procResults.ProcessingSuccessful = false;
             }
 
             // Send ProcessingCompleteEvent to EventHub
             var notificationBody = new ClientNotification()
             {
-                RequestId = requestId,
+                RequestId = procResults.RequestId,
                 ProcessingSuccessful = procResults.ProcessingSuccessful
             };
-            return await SendNotificationtoEventHub(notificationBody);
+            if( await SendNotificationtoEventHub(notificationBody))
+            {
+                return StatusCodes.Status200OK;
+            }
+            else
+            {
+                return StatusCodes.Status500InternalServerError;
+           }
         }
 
         private ProcessingResults OrchestrateProcessing(ProcConfig procConfig, ProcessingResults procResults)
@@ -187,7 +200,7 @@ namespace ProcessingExec.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error updating balance");
+                _logger.LogError(e, $"Error updating balance for RequestID: {userRequest.RequestId}");
                 return false;
             }
 
@@ -202,7 +215,12 @@ namespace ProcessingExec.Services
             // Select the partition acording to the transaction type, then publish the event
             var partitionId = _defaultPartitionId;
 
-            return await _eventHubPubClient.SendEventAsync(notificationAsJson, eventType, partitionId);
+            bool sent = await _eventHubPubClient.SendEventAsync(notificationAsJson, eventType, partitionId);
+            if (!sent)
+            {
+                _logger.LogError($"Error sending notification to EventHub for RequestID: {notificationBody.RequestId}");
+            }
+            return sent;
         }
     }
 }

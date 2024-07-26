@@ -1,7 +1,6 @@
 ﻿using CommonModels;
-using Newtonsoft.Json.Linq;
-using ProcConfigBuilder.Interfaces;
 using EventGridPublishClient;
+using ProcConfigBuilder.Interfaces;
 using RepositoryClient;
 
 namespace ProcConfigBuilder.Services
@@ -38,15 +37,13 @@ namespace ProcConfigBuilder.Services
             _logger = logger;
         }
 
-        public async Task<bool> CreateAndPublishProcConfigFile(GridEvent<dynamic> gridEvent)
+        public async Task<int> CreateAndPublishProcConfigFile(GridEvent<dynamic> gridEvent)
         {
             // Create the configuration file content; subsequent processing requires this to succeed
             var config = CreateProcConfig(gridEvent);
             if (config == null)
             {
-                string errMsg = "config is null";
-                _logger.LogError(errMsg);
-                return false;
+                return StatusCodes.Status500InternalServerError;
             }
 
             // If the RequestId is unavailable further processing is futile
@@ -54,7 +51,7 @@ namespace ProcConfigBuilder.Services
             {
                 string errMsg = "unable to determine the RequestId";
                 _logger.LogError(errMsg);
-                return false;
+                return StatusCodes.Status400BadRequest;
             }
 
             // Save the configuration file to the repository.
@@ -62,17 +59,12 @@ namespace ProcConfigBuilder.Services
             if (!saved)
             {
                 _logger.LogError($"Failed to save config file: {errString}");
-                return false;
+                return StatusCodes.Status500InternalServerError;
             }
 
             // Publish a ProcConfigCreatedEvent to the EventGrid
-
-            // Event State Transfer - the whole configuration file is sent
-            //var published = await _eventGridPubClient.PublishEventGridEvent(config.UserRequest.RequestId, "ProcConfigCreatedEvent", config);
-
-            // Event Notification - only the umbrella identifier and event type is sent
-            var published = await _eventGridPubClient.PublishEventGridEvent(config.UserRequest.RequestId, "ProcConfigCreatedEvent", string.Empty);
-            return (published == 200);
+            // Event Notification - only the request identifier and event type is sent
+            return await _eventGridPubClient.PublishEventGridEvent(config.UserRequest.RequestId, "ProcConfigCreatedEvent", string.Empty);
         }
 
         private ProcConfig? CreateProcConfig(GridEvent<dynamic> gridEvent)

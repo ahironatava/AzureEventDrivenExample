@@ -16,8 +16,9 @@ namespace FacadeApi.Services
 
         private RepoClient _repoClient;
 
-        public UserRequestService(IConfiguration configuration)
+        public UserRequestService(IConfiguration configuration, ILogger<UserRequestService> logger)
         {
+            _logger = logger;
             _configuration = configuration;
 
             // Create the EventHubPubClient (it performs null checks on the parameters)
