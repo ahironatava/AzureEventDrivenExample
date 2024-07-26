@@ -63,15 +63,15 @@ namespace EventBroker
             string? TopicEndpoint = null;
             string? TopicKey = null;
 
-            if (clientType.ToLower().Equals("buy"))
+            if (clientType.ToLower().Equals("request"))
             {
-                TopicEndpoint = _configuration["BuyEventGridTopicEndpoint"];
-                TopicKey = _configuration["BuyEventGridTopicKey"];
+                TopicEndpoint = _configuration["RequestEventGridTopicEndpoint"];
+                TopicKey = _configuration["RequestEventGridTopicKey"];
             }
-            else if (clientType.ToLower().Equals("sell"))
+            else if (clientType.ToLower().Equals("result"))
             {
-                TopicEndpoint = _configuration["SellEventGridTopicEndpoint"];
-                TopicKey = _configuration["SellEventGridTopicKey"];
+                TopicEndpoint = _configuration["ResponseEventGridTopicEndpoint"];
+                TopicKey = _configuration["ResponseEventGridTopicKey"];
             }
             else
             {

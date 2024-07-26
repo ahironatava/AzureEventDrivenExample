@@ -5,7 +5,7 @@ using WebHookAbstraction;
 namespace ProcConfigBuilder.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ProcConfigBuilderController : WebHookController
     {
         private readonly IProcConfigBuilderService _procConfigBuilderService;

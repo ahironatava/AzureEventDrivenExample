@@ -5,7 +5,7 @@ using WebHookAbstraction;
 namespace ClientNotifier.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ClientNotifierController : WebHookController
     {
         private readonly IClientNotifierService _clientNotifierService;

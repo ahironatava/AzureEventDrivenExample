@@ -1,16 +1,11 @@
-﻿using CommonModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProcessingExec.Interfaces;
-using System.Text;
 using WebHookAbstraction;
 
 namespace ProcessingExec.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ProcessingExecController : WebHookController
     {
         private readonly IProcessingService _processingService;
