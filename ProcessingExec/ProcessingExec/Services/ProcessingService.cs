@@ -10,19 +10,19 @@ namespace ProcessingExec.Services
     public class ProcessingService : IProcessingService
     {
         private readonly IConfiguration _configuration; // Configuration information
-        private readonly IFakeDatabase _fakeDatabase;   // Processing Results
         private readonly RepoClient _repoClient;        // System artefacts 
 
         private readonly EventHubPubClient _eventHubPubClient;
         private string _defaultPartitionId = "0";
 
+        private readonly FakeDatabaseClient _fakeDatabaseClient;
+
         private readonly ILogger<ProcessingService> _logger;
 
 
-        public ProcessingService(IConfiguration configuration, IFakeDatabase fakeDatabase, ILogger<ProcessingService> logger)
+        public ProcessingService(IConfiguration configuration, IFakeDatabaseClient fakeDatabase, ILogger<ProcessingService> logger)
         {
             _configuration = configuration;
-            _fakeDatabase = fakeDatabase;
             _logger = logger;
 
             // Initialise the Repository client interface
@@ -38,6 +38,9 @@ namespace ProcessingExec.Services
             string? hubName = _configuration["eh_name"];
             string? hubpartitionid = _configuration["eh_partition_id"];
             _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);
+
+            // Create the FakeDatabase
+
         }
 
         public async Task<int> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
@@ -111,9 +114,9 @@ namespace ProcessingExec.Services
 
             try
             {
-                balanceBefore = _fakeDatabase.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
+                balanceBefore = _fakeDatabaseClient.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
                 processingSuccessful = ApplyProcessing(procConfig);
-                balanceAfter = _fakeDatabase.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
+                balanceAfter = _fakeDatabaseClient.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
 
             }
             catch (Exception e)
@@ -191,10 +194,10 @@ namespace ProcessingExec.Services
                 switch (userRequest.UserTransaction.TransactionType.ToLower())
                 {
                     case "buy":
-                        _fakeDatabase.AddStockBalance(userRequest.UserName, userRequest.UserTransaction.StockName, userRequest.UserTransaction.Quantity);
+                        _fakeDatabaseClient.AddStockBalance(userRequest.UserName, userRequest.UserTransaction.StockName, userRequest.UserTransaction.Quantity);
                         break;
                     case "sell":
-                        _fakeDatabase.DeductStockBalance(userRequest.UserName, userRequest.UserTransaction.StockName, userRequest.UserTransaction.Quantity);
+                        _fakeDatabaseClient.DeductStockBalance(userRequest.UserName, userRequest.UserTransaction.StockName, userRequest.UserTransaction.Quantity);
                         break;
                 }
             }

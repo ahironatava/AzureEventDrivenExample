@@ -2,14 +2,14 @@
 
 namespace FakeDatabase
 {
-    public class FakeDatabase : IFakeDatabase
+    public class FakeDatabaseClient : IFakeDatabaseClient
     {
         // Class provides a basic simulation of a database
         // There is only one user to be supported: "fake name", as created in the Facacde API
 
         private List<UserAccount> _userAccounts;
 
-        public FakeDatabase()
+        public FakeDatabaseClient()
         {
             // Constructor
             var userStocks = new Dictionary<string, int>();

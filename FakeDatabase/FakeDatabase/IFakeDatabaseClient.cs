@@ -1,6 +1,6 @@
 ﻿namespace FakeDatabase
 {
-    public interface IFakeDatabase
+    public interface IFakeDatabaseClient
     {
         public int GetStockBalance(string userName, string stockName);
         public void AddStockBalance(string userName, string stockName, int quantity);
