@@ -17,9 +17,9 @@ namespace EventHubPublisherClient
             }
             _ehProducerClient = new EventHubProducerClient(eventHubNamespace, eventHubName);
 
-            if (string.IsNullOrWhiteSpace(defaultPartitionId))
+            if (!string.IsNullOrWhiteSpace(defaultPartitionId))
             {
-                throw new ArgumentException("Default Partition ID must be provided.");
+                _defaultPartitionId = defaultPartitionId;
             }
             _sendEventOptions = new SendEventOptions { PartitionId = _defaultPartitionId };
         }
