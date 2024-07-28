@@ -20,7 +20,7 @@ namespace ProcessingExec.Services
         private readonly ILogger<ProcessingService> _logger;
 
 
-        public ProcessingService(IConfiguration configuration, IFakeDatabaseClient fakeDatabase, ILogger<ProcessingService> logger)
+        public ProcessingService(IConfiguration configuration, ILogger<ProcessingService> logger)
         {
             _configuration = configuration;
             _logger = logger;
@@ -40,7 +40,7 @@ namespace ProcessingExec.Services
             _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);
 
             // Create the FakeDatabase
-
+            _fakeDatabaseClient = new FakeDatabaseClient();
         }
 
         public async Task<int> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
