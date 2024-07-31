@@ -30,32 +30,54 @@ namespace EventBroker
             [EventHubTrigger("src", Connection = "EventHubConnection")] string[] input,
             FunctionContext context)
         {
-            // Temporary
-            _logger.LogInformation($"Event Hubs triggered message: {input[0]}");
-
-            // TBC: does this work? If it does, change the if-else below to switch on event type //////////
-            // https://dev.to/kenakamu/azure-function-and-net-5-how-to-get-eventdata-for-event-hub-input-binding-3bmm
             var eventData = context.BindingContext.BindingData;
-            var eventProperties = eventData["Properties"];
-            _logger.LogInformation($"Event Hubs triggered message properties: {eventProperties}");
-            var eventType = eventData["EventType"];
-            _logger.LogInformation($"Event Hubs triggered with event type: {eventType}");
-            ////////////////////////////////////////////////////////////////////////////////////////////////
+            var eventType = GetEventType(eventData);
+            _logger.LogInformation($"eventType = {eventType}");
 
-            if (input[0].Contains("RequestType"))
+            if (eventType.Equals("UserRequestEvent"))
             {
-                var resultCode = await ProcessUserRequestEvent(input[0]);
-                _logger.LogInformation($"ProcessUserRequestEvent returned: {resultCode}");
+                _logger.LogInformation("Processing UserRequestEvent");
+                await ProcessUserRequestEvent(input[0]);
             }
-            else if (input[0].Contains("ProcessingSuccessful"))
+            else if (eventType.Equals("ProcessingCompleteEvent"))
             {
-                var resultCode = await ProcessProcessingCompleteEvent(input[0]);
-                _logger.LogInformation($"ProcessProcessingCompleteEvent returned: {resultCode}");
+                _logger.LogInformation("Processing ProcessingCompleteEvent");
+                await ProcessProcessingCompleteEvent(input[0]);
             }
             else
             {
-                _logger.LogError("Unexpected event type");
+                _logger.LogError($"Unexpected event type {eventType}");
             }
+ 
+            //switch (eventType)
+            //{
+            //    case "UserRequestEvent":
+            //        _logger.LogInformation("Processing UserRequestEvent");
+            //        await ProcessUserRequestEvent(input[0]);
+            //        break;
+            //    case "ProcessingCompleteEvent":
+            //        _logger.LogInformation("Processing ProcessingCompleteEvent");
+            //        await ProcessProcessingCompleteEvent(input[0]);
+            //        break;
+            //    default:
+            //        _logger.LogError($"Unexpected event type {eventType}");
+            //        break;
+            //}
+
+            //if (input[0].Contains("TransactionType"))
+            //{
+            //    var resultCode = await ProcessUserRequestEvent(input[0]);
+            //    _logger.LogInformation($"ProcessUserRequestEvent returned: {resultCode}");
+            //}
+            //else if (input[0].Contains("ProcessingSuccessful"))
+            //{
+            //    var resultCode = await ProcessProcessingCompleteEvent(input[0]);
+            //    _logger.LogInformation($"ProcessProcessingCompleteEvent returned: {resultCode}");
+            //}
+            //else
+            //{
+            //    _logger.LogError("Unexpected event type");
+            //}
         }
 
         private EventGridPubClient CreateEventGridPubClient(string clientType)
@@ -84,6 +106,18 @@ namespace EventBroker
             }
 
             return new EventGridPubClient(TopicEndpoint, TopicKey);
+        }
+
+        private string GetEventType(IReadOnlyDictionary<string, object?>? eventData)
+        {
+            // There will be a more elegant way ...
+            var eventProperties = eventData["PropertiesArray"];
+            var splitEventType = eventProperties.ToString().Split("EventType");
+
+            var splitComma = splitEventType[1].Split(",");
+            var eventType = splitComma[0].Remove(0, 2);
+
+            return eventType.Trim();
         }
 
         private async Task<bool> ProcessUserRequestEvent(string eventAsString)
