@@ -31,7 +31,7 @@ namespace RepositoryClient
 
         public async Task<(bool, string)> SaveUserRequestAsync(UserRequest userRequest)
         {
-            var path = $"{_repoUrl}/api/UserRequest/{userRequest.RequestId}";
+            var path = $"{_repoUrl}/api/UserRequest/";
             var content = JsonConvert.SerializeObject(userRequest);
 
             return await PostContentAsync(path, content);
@@ -54,7 +54,7 @@ namespace RepositoryClient
 
         public async Task<(bool, string)> SaveProcConfigAsync(ProcConfig procConfig)
         {
-            var path = $"{_repoUrl}/api/ProcConfig/{procConfig.UserRequest.RequestId}";
+            var path = $"{_repoUrl}/api/ProcConfig/";
             var content = JsonConvert.SerializeObject(procConfig);
 
             return await PostContentAsync(path, content);
@@ -77,7 +77,7 @@ namespace RepositoryClient
 
         public async Task<(bool, string)> SaveProcResultAsync(ProcessingResults processingResults)
         {
-            var path = $"{_repoUrl}/api/ProcResult/{processingResults.RequestId}";
+            var path = $"{_repoUrl}/api/ProcResult/";
             var content = JsonConvert.SerializeObject(processingResults);
 
             return await PostContentAsync(path, content);
