@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Relay;
+using Microsoft.Extensions.Configuration;
 
 namespace AzureRelayListener
 {
@@ -6,13 +7,24 @@ namespace AzureRelayListener
 
     public class Program
     {
-        private const string RelayNamespace = "<your relay namespace>.servicebus.windows.net";
-        private const string ConnectionName = "<your connection>";
-        private const string KeyName = "<name of your key>";
-        private const string Key = "<your key>";
+        private static string? _relayNamespace = string.Empty;
+        private static string? _connectionName = string.Empty;
+        private static string? _keyName = string.Empty;
+        private static string? _key = string.Empty;
 
         public static void Main(string[] args)
         {
+            var buidler = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.json", true, true);
+            var configuration = buidler.Build();
+
+            var relaySettings = configuration.GetSection("RelaySettings");
+            _relayNamespace = relaySettings["RelayNamespace"];
+            _connectionName = relaySettings["ConnectionName"];
+            _keyName = relaySettings["KeyName"];
+            _key = relaySettings["Key"];
+
             RunAsync().GetAwaiter().GetResult();
         }
 
@@ -20,8 +32,8 @@ namespace AzureRelayListener
         {
             var cts = new CancellationTokenSource();
 
-            var tokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(KeyName, Key);
-            var listener = new HybridConnectionListener(new Uri(string.Format("sb://{0}/{1}", RelayNamespace, ConnectionName)), tokenProvider);
+            var tokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(_keyName, _key);
+            var listener = new HybridConnectionListener(new Uri(string.Format("sb://{0}/{1}", _relayNamespace, _connectionName)), tokenProvider);
 
             listener.Connecting += (o, e) => { Console.WriteLine("Connecting"); };
             listener.Offline += (o, e) => { Console.WriteLine("Offline"); };
