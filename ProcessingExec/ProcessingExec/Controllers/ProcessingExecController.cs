@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CommonModels;
+using Microsoft.AspNetCore.Mvc;
 using ProcessingExec.Interfaces;
 using WebHookAbstraction;
 
@@ -36,7 +37,10 @@ namespace ProcessingExec.Controllers
                 return BadRequest(errMsg);
             }
 
-            int statusCode = await _processingService.ApplyConfiguredProcessing(validEvent);
+            string requestId = (string)Activator.CreateInstance(typeof(string), validEvent.Subject.ToString());
+            _logger.LogInformation($"requestId parsed as: {requestId}");
+
+            int statusCode = await _processingService.ApplyConfiguredProcessing(requestId);
             if (statusCode == 200)
             {
                 _logger.LogInformation("ApplyConfiguredProcessing successful");

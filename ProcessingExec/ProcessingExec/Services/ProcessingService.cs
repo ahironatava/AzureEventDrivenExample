@@ -43,7 +43,7 @@ namespace ProcessingExec.Services
             _fakeDatabaseClient = new FakeDatabaseClient();
         }
 
-        public async Task<int> ApplyConfiguredProcessing(GridEvent<dynamic> gridEvent)
+        public async Task<int> ApplyConfiguredProcessing(string requestId)
         {
             ProcConfig? procConfig = null;
             ProcessingResults procResults = new ProcessingResults();
@@ -53,11 +53,6 @@ namespace ProcessingExec.Services
 
             string errMsg = string.Empty;
             
-            // Get the Request ID
-            var requestId = gridEvent.Subject;
-            _logger.LogInformation($"ApplyConfiguredProcessing called with gridEvent.subject (requestId): {gridEvent.Subject}");
-
-
             // Get the ProcConfig file
             (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(requestId);
             if (procConfig == null)

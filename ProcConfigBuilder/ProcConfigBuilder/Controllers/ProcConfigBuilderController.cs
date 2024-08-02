@@ -39,6 +39,12 @@ namespace ProcConfigBuilder.Controllers
 
             UserRequest userRequest = (UserRequest)Activator.CreateInstance(typeof(UserRequest), validEvent.Data.ToString());
 
+            _logger.LogInformation($"UserRequest.RequestId = {userRequest.RequestId}");
+            _logger.LogInformation($"UserRequest.UserName = {userRequest.UserName}");
+            _logger.LogInformation($"UserRequest.Transction.TransactionType = {userRequest.UserTransaction.TransactionType}");
+            _logger.LogInformation($"UserRequest.Transction.StockName = {userRequest.UserTransaction.StockName}");
+            _logger.LogInformation($"UserRequest.Transction.Quantity = {userRequest.UserTransaction.Quantity}");
+
             if (!HasMandatoryContent(userRequest))
             {
                 return BadRequest("Mandatory content is missing.");
