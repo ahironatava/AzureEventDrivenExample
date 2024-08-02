@@ -11,6 +11,11 @@ namespace Repository.Services
             _processingResults = new Dictionary<string, ProcessingResults>();
         }
 
+        public Dictionary<string, ProcessingResults> GetProcessingResultsDictionary()
+        {
+            return _processingResults;
+        }
+
         public async Task<ProcessingResults> GetProcessingResults(string id)
         {
             ProcessingResults processingResults = null;

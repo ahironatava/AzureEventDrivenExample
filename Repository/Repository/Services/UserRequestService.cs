@@ -11,6 +11,11 @@ namespace Repository.Services
             _userRequests = new Dictionary<string, UserRequest>();
         }
 
+        public async Task<Dictionary<string, UserRequest>> GetUserRequestDictionary()
+        {
+           return _userRequests;
+        }
+
         public async Task<UserRequest> GetUserRequest(string id)
         {
             UserRequest userRequest = null;

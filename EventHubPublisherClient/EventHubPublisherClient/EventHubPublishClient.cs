@@ -11,11 +11,25 @@ namespace EventHubPublisherClient
 
         public EventHubPubClient(string eventHubNamespace, string eventHubName, string defaultPartitionId)
         {
-            if (string.IsNullOrWhiteSpace(eventHubNamespace) || string.IsNullOrWhiteSpace(eventHubName))
+            if (string.IsNullOrWhiteSpace(eventHubNamespace))
             {
-                throw new ArgumentException("Event Hub Namespace and Hub Name must be provided.");
+                throw new ArgumentException("Event Hub Namespace must be provided.");
             }
-            _ehProducerClient = new EventHubProducerClient(eventHubNamespace, eventHubName);
+
+            // NOTE: if the namespace includes the Event Hub name, the eventHubName parameter can be ignored
+            // otherwise, it must be appended.
+            if (!eventHubNamespace.Contains("EntityPath"))
+            {
+                if (string.IsNullOrWhiteSpace(eventHubName))
+                {
+                    throw new ArgumentException("Event Hub Name must be provided if it is not included in the Namespace");
+                }
+                else
+                {
+                    eventHubNamespace += $";EntityPath={eventHubName}";
+                }
+            }
+            _ehProducerClient = new EventHubProducerClient(eventHubNamespace);
 
             if (!string.IsNullOrWhiteSpace(defaultPartitionId))
             {

@@ -16,6 +16,13 @@ namespace Repository.Controllers
             _procResultService = procResultService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<Dictionary<string, ProcessingResults>>> Get()
+        {
+            var processingResults = _procResultService.GetProcessingResultsDictionary();
+            return Ok(processingResults);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProcessingResults>> Get(string id)
         {

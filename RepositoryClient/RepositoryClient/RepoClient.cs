@@ -1,5 +1,6 @@
 ﻿using CommonModels;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace RepositoryClient
 {
@@ -122,6 +123,76 @@ namespace RepositoryClient
                 errMsg = e.Message;
             }
             return (errMsg, objectString);
+        }
+
+        //////////////////////////////////////////////////////////////////
+
+        // Debug: get the containing Dictionaries
+
+        public async Task<(string, Dictionary<string, UserRequest>)> GetUserRequestDictionary()
+        {
+            string errMsg = string.Empty;
+            string objectString = string.Empty;
+            Dictionary<string, UserRequest> dictionary = new Dictionary<string, UserRequest>();
+            try
+            {
+                var response = await _client.GetAsync($"{_repoUrl}/api/UserRequest/");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    objectString = await response.Content.ReadAsStringAsync();
+                    dictionary = JsonConvert.DeserializeObject<Dictionary<string, UserRequest>>(objectString);
+                }
+            }
+            catch (Exception e)
+            {
+                errMsg = e.Message;
+            }
+            return (errMsg, dictionary);
+        }
+
+        public async Task<(string, Dictionary<string, ProcConfig>)> GetProcConfigDictionary()
+        {
+            string errMsg = string.Empty;
+            string objectString = string.Empty;
+            Dictionary<string, ProcConfig> dictionary = new Dictionary<string, ProcConfig>();
+            try
+            {
+                var response = await _client.GetAsync($"{_repoUrl}/api/ProcConfig/");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    objectString = await response.Content.ReadAsStringAsync();
+                    dictionary = JsonConvert.DeserializeObject<Dictionary<string, ProcConfig>>(objectString);
+                }
+            }
+            catch (Exception e)
+            {
+                errMsg = e.Message;
+            }
+            return (errMsg, dictionary);
+        }
+
+        public async Task<(string, Dictionary<string, ProcessingResults>)> GetProcessingResultsDictionary()
+        {
+            string errMsg = string.Empty;
+            string objectString = string.Empty;
+            Dictionary<string, ProcessingResults> dictionary = new Dictionary<string, ProcessingResults>();
+            try
+            {
+                var response = await _client.GetAsync($"{_repoUrl}/api/ProcResult/");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    objectString = await response.Content.ReadAsStringAsync();
+                    dictionary = JsonConvert.DeserializeObject<Dictionary<string, ProcessingResults>>(objectString);
+                }
+            }
+            catch (Exception e)
+            {
+                errMsg = e.Message;
+            }
+            return (errMsg, dictionary);
         }
     }
 }

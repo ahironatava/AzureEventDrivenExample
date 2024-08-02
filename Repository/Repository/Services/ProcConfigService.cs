@@ -10,6 +10,11 @@ namespace Repository.Services
         {
             _procConfigs = new Dictionary<string, ProcConfig>();
         }
+        
+        public Dictionary<string, ProcConfig> GetProcConfigDictionary()
+        {
+            return _procConfigs;
+        }
 
         public async Task<ProcConfig> GetProcConfig(string id)
         {

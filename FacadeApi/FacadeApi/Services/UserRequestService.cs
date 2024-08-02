@@ -22,10 +22,10 @@ namespace FacadeApi.Services
             _configuration = configuration;
 
             // Create the EventHubPubClient (it performs null checks on the parameters)
-            string? hubNamesapce = _configuration["ehns_connstring"];
+            string? hubNamespace = _configuration["ehns_connstring"];
             string? hubName = _configuration["eh_name"];
             string? hubpartitionid = _configuration["eh_partition_id"];
-            _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);  
+            _eventHubPubClient = new EventHubPubClient(hubNamespace, hubName, hubpartitionid);  
 
             // Initialise the Repository client interface
             string? repoUrl = _configuration["repo_url"];
@@ -45,6 +45,13 @@ namespace FacadeApi.Services
                 UserTransaction = transaction
             };
 
+            _logger.LogInformation("UserRequest created");
+            _logger.LogInformation($"RequestId: {userRequest.RequestId}");
+            _logger.LogInformation($"UserName: {userRequest.UserName}");
+            _logger.LogInformation($"TransactionType: {userRequest.UserTransaction.TransactionType}");
+            _logger.LogInformation($"StockName: {userRequest.UserTransaction.StockName}");
+            _logger.LogInformation($"Quantity: {userRequest.UserTransaction.Quantity}");
+
             // Save the User Request to the Repository. If this fails there is no benefit to continuing
             (bool savedSuccessfully, string errMsg) = await _repoClient.SaveUserRequestAsync(userRequest);
             if(!savedSuccessfully)
@@ -52,6 +59,8 @@ namespace FacadeApi.Services
                 _logger.LogError($"Failed to save User Request to Repository: {errMsg}");
                 return false;
             }
+
+            _logger.LogInformation("UserRequest saved to repo, now sending to Event Hub");
 
             return await SendRequestToEventHub(userRequest);
         }
@@ -71,6 +80,8 @@ namespace FacadeApi.Services
             {
                 _logger.LogError("Failed to send UserRequestEvent to Event Hub.");
             }
+
+            _logger.LogInformation("UserRequest saved to repo, now sending to Event Hub");
 
             return sent;
         }

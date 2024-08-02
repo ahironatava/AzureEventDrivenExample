@@ -16,6 +16,13 @@ namespace EventBroker
         private readonly EventGridPubClient _reqEventGridClient; // Requests received
         private readonly EventGridPubClient _resEventGridClient; // Results to send
 
+        private enum EventType
+        {
+            UnexpectedEventType,
+            UserRequestEvent,
+            ProcessingCompleteEvent
+        }
+
         public Function1(IConfiguration configuration, ILogger<Function1> logger)
         {
             _configuration = configuration;
@@ -31,53 +38,22 @@ namespace EventBroker
             FunctionContext context)
         {
             var eventData = context.BindingContext.BindingData;
-            var eventType = GetEventType(eventData);
-            _logger.LogInformation($"eventType = {eventType}");
+            EventType eventType = GetEventType(eventData);
 
-            if (eventType.Equals("UserRequestEvent"))
+            switch (eventType)
             {
-                _logger.LogInformation("Processing UserRequestEvent");
-                await ProcessUserRequestEvent(input[0]);
+                case EventType.UserRequestEvent:
+                    _logger.LogInformation("Processing UserRequestEvent");
+                    await ProcessUserRequestEvent(input[0]);
+                    break;
+                case EventType.ProcessingCompleteEvent:
+                    _logger.LogInformation("Processing ProcessingCompleteEvent");
+                    await ProcessProcessingCompleteEvent(input[0]);
+                    break;
+                default:
+                    _logger.LogError($"Unexpected event type {eventType}");
+                    break;
             }
-            else if (eventType.Equals("ProcessingCompleteEvent"))
-            {
-                _logger.LogInformation("Processing ProcessingCompleteEvent");
-                await ProcessProcessingCompleteEvent(input[0]);
-            }
-            else
-            {
-                _logger.LogError($"Unexpected event type {eventType}");
-            }
- 
-            //switch (eventType)
-            //{
-            //    case "UserRequestEvent":
-            //        _logger.LogInformation("Processing UserRequestEvent");
-            //        await ProcessUserRequestEvent(input[0]);
-            //        break;
-            //    case "ProcessingCompleteEvent":
-            //        _logger.LogInformation("Processing ProcessingCompleteEvent");
-            //        await ProcessProcessingCompleteEvent(input[0]);
-            //        break;
-            //    default:
-            //        _logger.LogError($"Unexpected event type {eventType}");
-            //        break;
-            //}
-
-            //if (input[0].Contains("TransactionType"))
-            //{
-            //    var resultCode = await ProcessUserRequestEvent(input[0]);
-            //    _logger.LogInformation($"ProcessUserRequestEvent returned: {resultCode}");
-            //}
-            //else if (input[0].Contains("ProcessingSuccessful"))
-            //{
-            //    var resultCode = await ProcessProcessingCompleteEvent(input[0]);
-            //    _logger.LogInformation($"ProcessProcessingCompleteEvent returned: {resultCode}");
-            //}
-            //else
-            //{
-            //    _logger.LogError("Unexpected event type");
-            //}
         }
 
         private EventGridPubClient CreateEventGridPubClient(string clientType)
@@ -108,16 +84,37 @@ namespace EventBroker
             return new EventGridPubClient(TopicEndpoint, TopicKey);
         }
 
-        private string GetEventType(IReadOnlyDictionary<string, object?>? eventData)
+        private EventType GetEventType(IReadOnlyDictionary<string, object?>? eventData)
         {
-            // There will be a more elegant way ...
-            var eventProperties = eventData["PropertiesArray"];
-            var splitEventType = eventProperties.ToString().Split("EventType");
+            _logger.LogInformation("GetEventType called"); 
+            var eventProperties = (eventData["PropertiesArray"]).ToString();
 
-            var splitComma = splitEventType[1].Split(",");
-            var eventType = splitComma[0].Remove(0, 2);
+            _logger.LogInformation($"eventProperties: {eventProperties}");
 
-            return eventType.Trim();
+            if (eventProperties.Contains("UserRequestEvent"))
+            {
+                return EventType.UserRequestEvent;
+            }
+            else if(eventProperties.Contains("ProcessingCompleteEvent"))
+            {
+                return EventType.ProcessingCompleteEvent;
+            }
+            else
+            {
+                _logger.LogInformation("Unexpected Event");
+
+                var splitEventType = eventProperties.Split("EventType");
+                _logger.LogInformation($"splitEventType: {splitEventType}");
+
+                var splitComma = splitEventType[1].Split(",");
+                _logger.LogInformation($"splitComma: {splitComma}");
+
+                var eventType = splitComma[0].Remove(0, 2);
+                _logger.LogInformation($"Unexpected event type: {eventType}");
+                _logger.LogError($"Unexpected event type: {eventType}");
+                
+                return EventType.UnexpectedEventType;
+            }
         }
 
         private async Task<bool> ProcessUserRequestEvent(string eventAsString)

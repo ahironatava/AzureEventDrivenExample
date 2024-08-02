@@ -52,21 +52,17 @@ namespace ProcessingExec.Services
             procResults.ProcessingSuccessful = false;
 
             string errMsg = string.Empty;
-
+            
             // Get the Request ID
-            var dynamicRequestId = gridEvent?.Data?.Id;
-            if (string.IsNullOrWhiteSpace(dynamicRequestId))
-            {
-                _logger.LogError("Request Id is missing.");
-                return StatusCodes.Status400BadRequest;
-            }
-            procResults.RequestId = gridEvent.Data.Id.ToString();
+            var requestId = gridEvent.Subject;
+            _logger.LogInformation($"ApplyConfiguredProcessing called with gridEvent.subject (requestId): {gridEvent.Subject}");
+
 
             // Get the ProcConfig file
-            (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(procResults.RequestId);
+            (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(requestId);
             if (procConfig == null)
             {
-                errMsg = $"ProcConfig file is missing for request {procResults.RequestId}";
+                errMsg = $"ProcConfig file is missing for request {requestId}";
                 _logger.LogError(errMsg);
                 procResults.StatusMessage = errMsg;
             }
@@ -85,7 +81,7 @@ namespace ProcessingExec.Services
             (bool saveSuccessful, string saveErrMsg) = await _repoClient.SaveProcResultAsync(procResults);
             if(!saveSuccessful)
             {
-                errMsg = $"Error saving processing results for request {procResults.RequestId}";
+                errMsg = $"Error saving processing results for request {requestId}";
                 _logger.LogError(saveErrMsg);
                 procResults.ProcessingSuccessful = false;
             }
@@ -93,7 +89,7 @@ namespace ProcessingExec.Services
             // Send ProcessingCompleteEvent to EventHub
             var notificationBody = new ClientNotification()
             {
-                RequestId = procResults.RequestId,
+                RequestId = requestId,
                 ProcessingSuccessful = procResults.ProcessingSuccessful
             };
             if( await SendNotificationtoEventHub(notificationBody))

@@ -27,32 +27,37 @@ namespace ProcConfigBuilder.Services
             }
             _eventGridPubClient = new EventGridPubClient(TopicEndpoint, TopicKey);
 
+            _logger.LogInformation("EventGridPubClient created");
+
             // Initialise the Repository client interface
             string? repoUrl = _configuration["repo_url"];
             if (string.IsNullOrWhiteSpace(repoUrl))
             {
                 throw new ArgumentException("Repository URL must be provided.");
             }
+            _logger.LogInformation($"repoUrl read as {repoUrl}.");
+
             _repoClient = new RepoClient(repoUrl);
-            _logger = logger;
+            _logger.LogInformation("_repoClient created");
         }
 
-        public async Task<int> CreateAndPublishProcConfigFile(GridEvent<dynamic> gridEvent)
+        public async Task<int> CreateAndPublishProcConfigFile(UserRequest userRequest)
         {
             // Create the configuration file content; subsequent processing requires this to succeed
-            var config = CreateProcConfig(gridEvent);
+            var config = CreateProcConfig(userRequest);
             if (config == null)
             {
                 return StatusCodes.Status500InternalServerError;
             }
 
-            // If the RequestId is unavailable further processing is futile
-            if((config.UserRequest == null) || string.IsNullOrWhiteSpace(config.UserRequest.RequestId))
-            {
-                string errMsg = "unable to determine the RequestId";
-                _logger.LogError(errMsg);
-                return StatusCodes.Status400BadRequest;
-            }
+            _logger.LogInformation("ProcConfig created");
+            _logger.LogInformation($"UserRequest.UserName: {userRequest.UserName}");
+            _logger.LogInformation($"UserRequest.RequestId: {userRequest.RequestId}");
+            _logger.LogInformation($"UserRequest.UserTransaction.TransactionType: {userRequest.UserTransaction.TransactionType}");
+            _logger.LogInformation($"UserRequest.UserTransaction.StockName: {userRequest.UserTransaction.StockName}");
+            _logger.LogInformation($"UserRequest.UserTransaction.Quantity: {userRequest.UserTransaction.Quantity}");
+            _logger.LogInformation($"UserProcParameters.AccountIsLocked: {config.UserProcParameters.AccountIsLocked}");
+            _logger.LogInformation($"UserProcParameters.Restrictions[0]: {config.UserProcParameters.Restrictions[0]}");
 
             // Save the configuration file to the repository.
             (bool saved, string errString) = await _repoClient.SaveProcConfigAsync(config);
@@ -67,18 +72,18 @@ namespace ProcConfigBuilder.Services
             return await _eventGridPubClient.PublishEventGridEvent(config.UserRequest.RequestId, "ProcConfigCreatedEvent", string.Empty);
         }
 
-        private ProcConfig? CreateProcConfig(GridEvent<dynamic> gridEvent)
+        private ProcConfig? CreateProcConfig(UserRequest userRequest)
         {
             ProcConfig procConfig = null;
             try
             {
                 // Use the UserRequest UserName to access the configuration data for the user
-                var userName = gridEvent.Data.UserRequest.UserName;
+                var userName = userRequest.UserName;
                 var userProcParameters = GetUserProcParameters(userName);
 
                 procConfig = new ProcConfig
                 {
-                    UserRequest = gridEvent.Data.UserRequest,
+                    UserRequest = userRequest,
                     UserProcParameters = userProcParameters
                 };
             }

@@ -26,6 +26,8 @@ namespace ProcConfigBuilder.Controllers
 
         public override async Task<IActionResult> HandleGridEvents(string jsonContent)
         {
+            _logger.LogInformation("entered HandleGridEvents");
+
             List<string> validEventTypes = new List<string> { "UserRequestEvent" };
 
             (var validEvent, string errMsg) = GetValidEvent(jsonContent, validEventTypes);
@@ -35,12 +37,14 @@ namespace ProcConfigBuilder.Controllers
                 return BadRequest(errMsg);
             }
 
-            if (!HasMandatoryContent(validEvent))
+            UserRequest userRequest = (UserRequest)Activator.CreateInstance(typeof(UserRequest), validEvent.Data.ToString());
+
+            if (!HasMandatoryContent(userRequest))
             {
                 return BadRequest("Mandatory content is missing.");
             }
 
-            int statusCode = await _procConfigBuilderService.CreateAndPublishProcConfigFile(validEvent);           
+            int statusCode = await _procConfigBuilderService.CreateAndPublishProcConfigFile(userRequest);           
             if(statusCode == 200)
             {
                 _logger.LogInformation("CreateAndPublishProcConfigFile succeeded.");
@@ -53,22 +57,17 @@ namespace ProcConfigBuilder.Controllers
             }   
         }
 
-        private bool HasMandatoryContent(GridEvent<dynamic> gridEvent)
+        private bool HasMandatoryContent(UserRequest userRequest)
         {
-            var userRequest = gridEvent.Data.UserRequest;
-            var requestId = userRequest?.RequestId;
-            var userName = userRequest?.UserName;
-            if(string.IsNullOrWhiteSpace(requestId) || string.IsNullOrWhiteSpace(userName))
+            if(string.IsNullOrWhiteSpace(userRequest.RequestId) || string.IsNullOrWhiteSpace(userRequest.UserName))
             {
                 _logger.LogError("RequestId or UserName is missing.");
                 return false;
             }
 
-            var userTransaction = gridEvent.Data.UserRequest?.UserTransaction;
-            var transactionType = userTransaction?.TransactionType;
-            var stockName = userTransaction?.StockName;
-            var stockQuantity = userTransaction?.StockQuantity;
-            if(string.IsNullOrWhiteSpace(transactionType) || string.IsNullOrWhiteSpace(stockName) || stockQuantity < 1)
+            Transaction transaction = userRequest.UserTransaction;
+
+            if(string.IsNullOrWhiteSpace(transaction.TransactionType) || string.IsNullOrWhiteSpace(transaction.StockName) || transaction.Quantity < 1)
             {
                 _logger.LogError("Transaction Type or StockName is missing, or StockQuantity is less than 1");
                 return false;

@@ -16,6 +16,13 @@ namespace Repository.Controllers
             _procConfigService = procConfigService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<Dictionary<string, ProcConfig>>> Get()
+        {
+            var procConfigs = _procConfigService.GetProcConfigDictionary();
+            return Ok(procConfigs);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProcConfig>> Get(string id)
         {

@@ -16,6 +16,12 @@ namespace Repository.Controllers
             _userRequestService = userRequestService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<Dictionary<string, UserRequest>>> Get()
+        {
+            var userRequests = await _userRequestService.GetUserRequestDictionary();
+            return Ok(userRequests);
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserRequest>> Get(string id)
