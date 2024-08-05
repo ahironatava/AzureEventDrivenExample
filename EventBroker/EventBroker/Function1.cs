@@ -37,6 +37,8 @@ namespace EventBroker
             [EventHubTrigger("src", Connection = "EventHubConnection")] string[] input,
             FunctionContext context)
         {
+            _logger.LogInformation("EventHubFunction called");
+
             var eventData = context.BindingContext.BindingData;
             EventType eventType = GetEventType(eventData);
 
@@ -54,6 +56,7 @@ namespace EventBroker
                     _logger.LogError($"Unexpected event type {eventType}");
                     break;
             }
+            _logger.LogInformation("\n");
         }
 
         private EventGridPubClient CreateEventGridPubClient(string clientType)
@@ -192,10 +195,10 @@ namespace EventBroker
                 return false;
             }
 
-            var sendResult = await _resEventGridClient.PublishEventGridEvent(clientNotification.RequestId, "ClientNotification", clientNotification);
+            var sendResult = await _resEventGridClient.PublishEventGridEvent(clientNotification.RequestId, "ProcessingCompleteEvent", clientNotification);
             if (sendResult == 200)
             {
-                _logger.LogInformation("ClientNotification published successfully");
+                _logger.LogInformation("ProcessingCompleteEvent published successfully");
                 return true;
             }
             else

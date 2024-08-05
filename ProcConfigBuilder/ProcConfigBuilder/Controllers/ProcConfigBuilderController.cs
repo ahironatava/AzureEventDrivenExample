@@ -27,6 +27,7 @@ namespace ProcConfigBuilder.Controllers
         public override async Task<IActionResult> HandleGridEvents(string jsonContent)
         {
             _logger.LogInformation("entered HandleGridEvents");
+            _logger.LogInformation($"HandleGridEvents called with jsonContent: {jsonContent}");
 
             List<string> validEventTypes = new List<string> { "UserRequestEvent" };
 

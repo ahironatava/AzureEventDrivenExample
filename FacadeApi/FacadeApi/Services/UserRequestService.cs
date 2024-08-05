@@ -45,7 +45,7 @@ namespace FacadeApi.Services
                 UserTransaction = transaction
             };
 
-            _logger.LogInformation("UserRequest created");
+            _logger.LogInformation("\n\nUserRequest created");
             _logger.LogInformation($"RequestId: {userRequest.RequestId}");
             _logger.LogInformation($"UserName: {userRequest.UserName}");
             _logger.LogInformation($"TransactionType: {userRequest.UserTransaction.TransactionType}");
@@ -56,7 +56,7 @@ namespace FacadeApi.Services
             (bool savedSuccessfully, string errMsg) = await _repoClient.SaveUserRequestAsync(userRequest);
             if(!savedSuccessfully)
             {
-                _logger.LogError($"Failed to save User Request to Repository: {errMsg}");
+                _logger.LogError($"Failed to save User Request to Repository: {errMsg}\n");
                 return false;
             }
 
@@ -81,7 +81,7 @@ namespace FacadeApi.Services
                 _logger.LogError("Failed to send UserRequestEvent to Event Hub.");
             }
 
-            _logger.LogInformation("UserRequest saved to repo, now sending to Event Hub");
+            _logger.LogInformation("UserRequest sent to Event Hub\n");
 
             return sent;
         }

@@ -37,18 +37,18 @@ namespace ProcessingExec.Controllers
                 return BadRequest(errMsg);
             }
 
-            string requestId = (string)Activator.CreateInstance(typeof(string), validEvent.Subject.ToString());
-            _logger.LogInformation($"requestId parsed as: {requestId}");
+            string requestId = validEvent.Subject;
+            _logger.LogInformation($"\nrequestId parsed as: {requestId}\n");
 
             int statusCode = await _processingService.ApplyConfiguredProcessing(requestId);
             if (statusCode == 200)
             {
-                _logger.LogInformation("ApplyConfiguredProcessing successful");
+                _logger.LogInformation("ApplyConfiguredProcessing successful\n");
                 return Ok();
             }
             else
             {
-                _logger.LogInformation("ApplyConfiguredProcessing system error");
+                _logger.LogInformation("ApplyConfiguredProcessing system error\n");
                 return StatusCode(statusCode);
             }
         }

@@ -34,10 +34,10 @@ namespace ProcessingExec.Services
             _repoClient = new RepoClient(repoUrl);
 
             // Create the EventHubPubClient (it performs null checks on the parameters)
-            string? hubNamesapce = _configuration["ehns_connstring"];
+            string? hubNamespace = _configuration["ehns_connstring"];
             string? hubName = _configuration["eh_name"];
             string? hubpartitionid = _configuration["eh_partition_id"];
-            _eventHubPubClient = new EventHubPubClient(hubNamesapce, hubName, hubpartitionid);
+            _eventHubPubClient = new EventHubPubClient(hubNamespace, hubName, hubpartitionid);
 
             // Create the FakeDatabase
             _fakeDatabaseClient = new FakeDatabaseClient();
@@ -46,7 +46,10 @@ namespace ProcessingExec.Services
         public async Task<int> ApplyConfiguredProcessing(string requestId)
         {
             ProcConfig? procConfig = null;
-            ProcessingResults procResults = new ProcessingResults();
+            ProcessingResults procResults = new ProcessingResults()
+            {
+                RequestId = requestId
+            };
 
             procResults.StatusMessage = string.Empty;
             procResults.ProcessingSuccessful = false;
@@ -54,7 +57,11 @@ namespace ProcessingExec.Services
             string errMsg = string.Empty;
             
             // Get the ProcConfig file
-            (string errString, ProcConfig procConfigRead) = await _repoClient.GetProcConfigAsync(requestId);
+            
+            // Hard-coded delay to allow the repository to save the file before attempting to access it
+            await Task.Delay(5000);
+
+            (string errString, procConfig) = await _repoClient.GetProcConfigAsync(requestId);
             if (procConfig == null)
             {
                 errMsg = $"ProcConfig file is missing for request {requestId}";
@@ -67,12 +74,17 @@ namespace ProcessingExec.Services
                 procResults.StockName = procConfig.UserRequest.UserTransaction.StockName;
                 procResults.Quantity = procConfig.UserRequest.UserTransaction.Quantity;
 
+                _logger.LogInformation($"procConfig.UserRequest.UserName = {procConfig.UserRequest.UserName}");
+                _logger.LogInformation($"procConfig.UserRequest.UserTransaction.StockName = {procConfig.UserRequest.UserTransaction.StockName}");
+                _logger.LogInformation($"procConfig.UserRequest.UserTransaction.Quantity = {procConfig.UserRequest.UserTransaction.Quantity}");
+
                 // Orchestrate the required processing
                 var processingResults = OrchestrateProcessing(procConfig, procResults);
-                procResults.ProcessingSuccessful = (string.IsNullOrWhiteSpace(processingResults.StatusMessage)) ? false : true;
+                procResults.ProcessingSuccessful = (string.IsNullOrWhiteSpace(processingResults.StatusMessage)) ? true : false;
             }
 
             // Save the results to the repository
+            _logger.LogInformation("Saving processing results to repository");
             (bool saveSuccessful, string saveErrMsg) = await _repoClient.SaveProcResultAsync(procResults);
             if(!saveSuccessful)
             {
@@ -82,6 +94,7 @@ namespace ProcessingExec.Services
             }
 
             // Send ProcessingCompleteEvent to EventHub
+            _logger.LogInformation("Sending notification to Event Hub");
             var notificationBody = new ClientNotification()
             {
                 RequestId = requestId,
@@ -102,12 +115,18 @@ namespace ProcessingExec.Services
             int balanceBefore = 0;
             int balanceAfter = 0;
             bool processingSuccessful = false;
+            procResults.StatusMessage = string.Empty;
 
             try
             {
                 balanceBefore = _fakeDatabaseClient.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
                 processingSuccessful = ApplyProcessing(procConfig);
                 balanceAfter = _fakeDatabaseClient.GetStockBalance(procConfig.UserRequest.UserName, procConfig.UserRequest.UserTransaction.StockName);
+
+                _logger.LogInformation("\nProcessing complete");
+                _logger.LogInformation($"balanceBefore = {balanceBefore}");
+                _logger.LogInformation($"processingSuccessful = {processingSuccessful}");
+                _logger.LogInformation($"balanceAfter = {balanceAfter}");
 
             }
             catch (Exception e)

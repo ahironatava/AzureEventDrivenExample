@@ -29,8 +29,11 @@ namespace ClientNotifier.Services
         {
             // Notify the client, by passing the relevant information through the Azure Relay
             List<string> stringList = new List<string>();
-            stringList.Add(gridEvent.Data["RequestId"]);
-            stringList.Add(gridEvent.Data["ProcessingSuccessful"]);
+            stringList.Add($"RequestId {gridEvent.Data.RequestId}");
+            stringList.Add($"Successful = {gridEvent.Data.ProcessingSuccessful}");
+
+            _logger.LogInformation($"Notify with: {stringList}");
+
             (bool sent, string errMsg) = await _relaySender.Send(stringList);
             if(! sent)
             {
