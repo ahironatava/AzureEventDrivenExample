@@ -36,7 +36,7 @@ namespace FacadeApi.Services
             _repoClient = new RepoClient(repoUrl);
         }
 
-        public async Task<bool> ProcessRequest(Transaction transaction, string userName)
+        public async Task<(bool, string)> ProcessRequest(Transaction transaction, string userName)
         {
             UserRequest userRequest = new UserRequest
             {
@@ -57,12 +57,20 @@ namespace FacadeApi.Services
             if(!savedSuccessfully)
             {
                 _logger.LogError($"Failed to save User Request to Repository: {errMsg}\n");
-                return false;
+                return (false, string.Empty);
             }
 
             _logger.LogInformation("UserRequest saved to repo, now sending to Event Hub");
 
-            return await SendRequestToEventHub(userRequest);
+            var sent = await SendRequestToEventHub(userRequest);
+            if(!sent)
+            {
+                return (false, string.Empty);
+            }
+            else
+            {
+               return (true, userRequest.RequestId);
+            }
         }
 
         private async Task<bool> SendRequestToEventHub(UserRequest userRequest)
