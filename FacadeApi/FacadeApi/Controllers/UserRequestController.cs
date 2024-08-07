@@ -31,7 +31,7 @@ namespace FacadeApi.Controllers
             }
 
             (bool serviceSuccess, string recordId) = await _userRequestService.ProcessRequest(transaction, userName);
-            Response.StatusCode = serviceSuccess ? 200 : 500;
+            Response.StatusCode = serviceSuccess ? 202 : 500;
             if(serviceSuccess)
             {
                 Response.Headers.Append("Location", $"api/Facade/{recordId}");

@@ -32,7 +32,7 @@ namespace ClientNotifier.Services
             stringList.Add($"RequestId {gridEvent.Data.RequestId}");
             stringList.Add($"Successful = {gridEvent.Data.ProcessingSuccessful}");
 
-            _logger.LogInformation($"Notify with: {stringList}");
+            _logger.LogInformation($"Notify with: RequestId = {gridEvent.Data.RequestId}, Successful = {gridEvent.Data.ProcessingSuccessful}");
 
             (bool sent, string errMsg) = await _relaySender.Send(stringList);
             if(! sent)
