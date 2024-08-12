@@ -73,10 +73,12 @@ namespace ProcessingExec.Services
                 procResults.UserName = procConfig.UserRequest.UserName;
                 procResults.StockName = procConfig.UserRequest.UserTransaction.StockName;
                 procResults.Quantity = procConfig.UserRequest.UserTransaction.Quantity;
+                procResults.TransactionType = procConfig.UserRequest.UserTransaction.TransactionType;
 
                 _logger.LogInformation($"procConfig.UserRequest.UserName = {procConfig.UserRequest.UserName}");
                 _logger.LogInformation($"procConfig.UserRequest.UserTransaction.StockName = {procConfig.UserRequest.UserTransaction.StockName}");
                 _logger.LogInformation($"procConfig.UserRequest.UserTransaction.Quantity = {procConfig.UserRequest.UserTransaction.Quantity}");
+                _logger.LogInformation($"procConfig.UserRequest.UserTransaction.TransactionType = {procConfig.UserRequest.UserTransaction.TransactionType}");
 
                 // Orchestrate the required processing
                 var processingResults = OrchestrateProcessing(procConfig, procResults);
